@@ -1,11 +1,11 @@
 import pandas
+import os
 from sklearn import svm
 from sklearn.externals import joblib
 
+directory = os.listdir(os.fsencode('./train'))
 dataset = pandas.concat([
-    pandas.read_csv('train/BASE Big WS 1.csv'),
-    pandas.read_csv('train/Skydive Small WS 1.csv'),
-    pandas.read_csv('train/Skydive Med WS 1.csv')
+    pandas.read_csv('./train/' + os.fsdecode(name)) for name in directory
 ])
 
 dataset['h_speed'] = (dataset['velN']**2 + dataset['velE']**2) ** 0.5 * 3.6

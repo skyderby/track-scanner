@@ -9,4 +9,4 @@ install:
   - python build_model.py
 
 script:
-  - python app_test.py
+  - pytest

@@ -1,7 +1,6 @@
-from tracksegmenter import app
+from tracksegmenter import app, classifier
 from flask import request, jsonify
 import pandas
-from sklearn.externals import joblib
 from io import StringIO
 
 class_mappings = {
@@ -13,10 +12,9 @@ class_mappings = {
 
 @app.route('/prediction', methods=['POST'])
 def prediction():
-    clf = joblib.load('model.pkl')
     posted_data = request.data.decode('utf-8')
     df = pandas.read_csv(StringIO(posted_data))
-    df['class'] = clf.predict(df[['h_speed', 'v_speed']])
+    df['class'] = classifier.predict(df[['h_speed', 'v_speed']])
 
     df['group'] = df['class'].diff().ne(0).cumsum()
     groups = df.groupby('group')['group'].apply(lambda x: x.index)

@@ -26,9 +26,11 @@ def prediction():
         values = df.iloc[x]
         first, last = values.iloc[0], values.iloc[-1]
 
-        group_name = class_mappings[first['class']]
-        group = dict()
-        group[group_name]  = {'start': first['fl_time'].item(), 'end': last['fl_time'].item()}
-        res.append(group)
+        res.append({
+            'type':     class_mappings[first['class']],
+            'start':    round(first['fl_time'].item(), 1),
+            'end':      round(last['fl_time'].item(), 1),
+            'duration': round((last['fl_time'] - first['fl_time']).item(), 1)
+        })
 
     return jsonify(res)

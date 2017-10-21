@@ -17,8 +17,8 @@ class TestPredictionRequest(unittest.TestCase):
         data = json.loads(resp.data)
 
         expected = [
-            {'aircraft': {'start': 1, 'end': 8}},
-            {'flight': {'start': 9, 'end': 14}}
+            {'type': 'aircraft', 'start': 1, 'end': 8,  'duration': 7},
+            {'type': 'flight',   'start': 9, 'end': 14, 'duration': 5}
         ]
 
         self.assertEqual(data, expected)

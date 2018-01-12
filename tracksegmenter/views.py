@@ -1,5 +1,5 @@
 from tracksegmenter import app, classifier
-from flask import request, jsonify
+from flask import request, jsonify, render_template
 import pandas
 from io import StringIO
 
@@ -9,6 +9,7 @@ class_mappings = {
     3: 'canopy',
     4: 'aircraft'
 }
+
 
 @app.route('/prediction', methods=['POST'])
 def prediction():
@@ -32,3 +33,17 @@ def prediction():
         })
 
     return jsonify(res)
+
+
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html')
+
+
+@app.route('/model/overview', methods=['GET'])
+def model_overview():
+    from .data_flow import train_dataset
+    dataset = train_dataset()
+    classes_counts = dataset['class'].value_counts().to_dict()
+
+    return render_template('model_overview.html', classes_counts=classes_counts)

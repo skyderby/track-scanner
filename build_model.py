@@ -7,7 +7,7 @@ from tracksegmenter.data_flow import features_list, train_dataset
 import numpy as np
 import matplotlib
 matplotlib.use('agg')
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # noqa
 
 df = train_dataset()
 
@@ -39,7 +39,7 @@ XX, YY = np.meshgrid(np.arange(x_min, x_max, h),
 
 Z = clf.predict(np.c_[XX.ravel(), YY.ravel()]).reshape(XX.shape)
 ax = plt.gca()
-ax.pcolormesh(XX, YY, Z, alpha = 0.1)
+ax.pcolormesh(XX, YY, Z, alpha=0.1)
 
 plt.savefig('tracksegmenter/static/svm_plot.png')
 

@@ -4,3 +4,6 @@ model.pkl
 venv/
 .ropeproject/
 .cache
+
+svm_plot.png
+values_plot.png

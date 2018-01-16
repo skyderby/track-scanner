@@ -2,7 +2,6 @@
 
 import pandas
 import numpy as np
-from glob import glob
 from sklearn import svm
 from sklearn import preprocessing
 from sklearn.externals import joblib
@@ -13,8 +12,13 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt  # noqa
 
 
-def train_dataset():
-    directory = glob('./data/train/*.csv')
+def train_dataset(path_prefix=None):
+    from glob import glob
+
+    if path_prefix is None:
+        path_prefix = '.'
+
+    directory = glob(path_prefix + '/data/train/*.csv')
     train_files = list()
 
     # All train files are 5Hz, window size is 3 sec
@@ -33,59 +37,74 @@ def train_dataset():
     return pandas.concat(train_files)
 
 
-"""
---- TRAINING MODEL
-"""
-df = train_dataset()
+class ModelBuilder:
+    def __init__(self):
+        self.features_list = ['h_speed', 'v_speed']
+        self.df = train_dataset()
 
-print('--- Training model')
+    def call(self):
+        self.train_model()
+        self.save_model()
+        self.save_model_plot()
+        self.save_data_distribution_plot()
 
-# Filter only by Flight and Canopy classes
-df = df.loc[df['class'].isin([2, 3])]
+    def train_model(self):
+        print('--- Training model')
 
-df['is_flight'] = (df['class'] == 2).astype('float')
+        # Filter only by Flight and Canopy classes
+        self.df = self.df.loc[self.df['class'].isin([2, 3])]
 
-features_list = ['h_speed', 'v_speed']
-df[features_list] = preprocessing.minmax_scale(df[features_list])
+        self.df['is_flight'] = (self.df['class'] == 2).astype('float')
 
-X = df[features_list]
-y = df['is_flight']
+        self.df[self.features_list] = (
+            preprocessing.minmax_scale(self.df[self.features_list])
+        )
 
-clf = svm.SVC(kernel='rbf', gamma=0.1, C=1.0)
-clf.fit(X, y)
+        X = self.df[self.features_list]
+        y = self.df['is_flight']
 
-"""
---- SAVING MODEL TO FILE
-"""
-print('--- Saving model to file')
+        self.clf = svm.SVC(kernel='rbf', gamma=0.1, C=1.0)
+        self.clf.fit(X, y)
 
-joblib.dump(clf, 'model.pkl')
+    def save_model(self):
+        print('--- Saving model to file')
 
-"""
---- GENERATING PLOTS
-"""
-print('--- Saving SVM plot')
+        joblib.dump(self.clf, 'model.pkl')
 
-plt.figure()
-plt.title('SVM RBF Kernel')
+    def save_model_plot(self):
+        print('--- Saving SVM plot')
 
-plt.scatter(df['h_speed'], df['v_speed'], c=y, zorder=10, s=2)
+        plt.figure()
+        plt.title('SVM RBF Kernel')
 
-x_min, x_max = df['h_speed'].min(), df['h_speed'].max()
-y_min, y_max = df['v_speed'].min(), df['v_speed'].max()
+        plt.scatter(
+            self.df['h_speed'],
+            self.df['v_speed'],
+            c=self.df['is_flight'],
+            zorder=10,
+            s=2
+        )
 
-h = 0.01
-XX, YY = np.meshgrid(np.arange(x_min, x_max, h),
-                     np.arange(y_min, y_max, h))
+        x_min, x_max = self.df['h_speed'].min(), self.df['h_speed'].max()
+        y_min, y_max = self.df['v_speed'].min(), self.df['v_speed'].max()
 
-Z = clf.predict(np.c_[XX.ravel(), YY.ravel()]).reshape(XX.shape)
-ax = plt.gca()
-ax.pcolormesh(XX, YY, Z, alpha=0.1)
+        h = 0.01
+        XX, YY = np.meshgrid(np.arange(x_min, x_max, h),
+                             np.arange(y_min, y_max, h))
 
-plt.savefig('tracksegmenter/static/svm_plot.png')
+        Z = self.clf.predict(np.c_[XX.ravel(), YY.ravel()]).reshape(XX.shape)
+        ax = plt.gca()
+        ax.pcolormesh(XX, YY, Z, alpha=0.1)
 
-print('--- Saving value distribution plot')
-plt.figure()
-plt.title('Examples by class')
-plt.hist(df['is_flight'])
-plt.savefig('tracksegmenter/static/values_plot.png')
+        plt.savefig('tracksegmenter/static/svm_plot.png')
+
+    def save_data_distribution_plot(self):
+        print('--- Saving value distribution plot')
+        plt.figure()
+        plt.title('Examples by class')
+        plt.hist(self.df['is_flight'])
+        plt.savefig('tracksegmenter/static/values_plot.png')
+
+
+if __name__ == '__main__':
+    ModelBuilder().call()

@@ -63,7 +63,7 @@ class ModelBuilder:
         X = self.df[self.features_list]
         y = self.df['is_flight']
 
-        self.clf = svm.SVC(kernel='rbf', gamma=0.1, C=1.0)
+        self.clf = svm.SVC(kernel='rbf', gamma=1.0, C=100)
         self.clf.fit(X, y)
 
     def save_model(self):

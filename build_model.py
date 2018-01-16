@@ -7,7 +7,6 @@ from sklearn import svm
 from sklearn import preprocessing
 from sklearn.externals import joblib
 from scipy.signal import savgol_filter
-from tracksegmenter.data_flow import features_list
 
 import matplotlib
 matplotlib.use('agg')
@@ -46,6 +45,7 @@ df = df.loc[df['class'].isin([2, 3])]
 
 df['is_flight'] = (df['class'] == 2).astype('float')
 
+features_list = ['h_speed', 'v_speed']
 df[features_list] = preprocessing.minmax_scale(df[features_list])
 
 X = df[features_list]

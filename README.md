@@ -1,10 +1,13 @@
 # Track scanner
 
+[![Build Status](https://travis-ci.org/skyderby/track-segmentation.svg?branch=master)](https://travis-ci.org/skyderby/track-segmentation)
+
+See it live: https://track-scanner.herokuapp.com/model/overview
+
 API microservice that uses machine learning to:
 * Find jump data from whole track that usually contains of walking, flying in aircraft, jump and canopy ride.
 * Detect whether it was Basejumping or Skydiving
 
-[![Build Status](https://travis-ci.org/skyderby/track-segmentation.svg?branch=master)](https://travis-ci.org/skyderby/track-segmentation)
 
 ## Usage
 

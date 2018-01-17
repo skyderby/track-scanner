@@ -7,7 +7,7 @@ from datetime import timedelta
 from sklearn import preprocessing
 
 
-@app.route('/prediction', methods=['POST'])
+@app.route('/api/v1/scan', methods=['POST'])
 def prediction():
     posted_data = request.data.decode('utf-8')
     df = pandas.read_csv(StringIO(posted_data))

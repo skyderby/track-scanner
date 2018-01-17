@@ -14,7 +14,7 @@ API microservice that uses machine learning to:
 As API endpoint - send POST request with csv data. Example:
 
 ```
-curl -H "Content-Type: application/csv" -X POST https://track-scanner.herokuapp.com/prediction --data-binary "@./data/test/15-56-18.CSV"
+curl -H "Content-Type: application/csv" -X POST https://track-scanner.herokuapp.com/api/v1/scan --data-binary "@./data/test/15-56-18.CSV"
 ```
 
 Response:

@@ -11,6 +11,21 @@ API microservice that uses machine learning to:
 
 ## Usage
 
+As API endpoint - send POST request with csv data. Example:
+
+```
+curl -H "Content-Type: application/csv" -X POST https://track-scanner.herokuapp.com/prediction --data-binary "@./data/test/15-56-18.CSV"
+```
+
+Response:
+```
+{
+  "activity": "skydive",
+  "flight_starts_at": "2016-10-23T21:07:59.650"
+  "deploy_at": "2016-10-23T21:09:55.400",
+}
+```
+
 ## Development
 
 Want to contribute? Great!

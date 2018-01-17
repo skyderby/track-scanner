@@ -10,8 +10,13 @@ from sklearn import preprocessing
 @app.route('/api/v1/scan', methods=['POST'])
 def prediction():
     posted_data = request.data.decode('utf-8')
-    df = pandas.read_csv(StringIO(posted_data))
+    df = pandas.read_csv(StringIO(posted_data), header=0)
     df = extract_features(df)
+
+    rows_with_flight = df[df['flight_started'] == True]
+    flight_started_occurences = rows_with_flight.count()['flight_started']
+    if flight_started_occurences < 5:
+        return jsonify({'error': 'no flight data'})
 
     flight_start = (df['flight_started'].ne(False).idxmax() -
                     timedelta(seconds=2.55))

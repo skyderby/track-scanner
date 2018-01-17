@@ -22,11 +22,15 @@ class TestAPI_V1(unittest.TestCase):
         data = json.loads(resp.data)
 
         date_format = '%Y-%m-%dT%H:%M:%S.%f'
-        expected_start = datetime.strptime('2016-10-23T21:07:59.000', date_format)
-        actual_start = datetime.strptime(data['flight_starts_at'], date_format)
+        expected_start = datetime.strptime('2016-10-23T21:07:59.000',
+                                           date_format)
+        actual_start = datetime.strptime(data['flight_starts_at'],
+                                         date_format)
 
-        expected_deploy = datetime.strptime('2016-10-23T21:09:56.000', date_format)
-        actual_deploy = datetime.strptime(data['deploy_at'], date_format)
+        expected_deploy = datetime.strptime('2016-10-23T21:09:56.000',
+                                            date_format)
+        actual_deploy = datetime.strptime(data['deploy_at'],
+                                          date_format)
 
         self.assertEqual('skydive', data['activity'])
         self.assertAlmostEqual(expected_start,
@@ -35,3 +39,13 @@ class TestAPI_V1(unittest.TestCase):
         self.assertAlmostEqual(expected_deploy,
                                actual_deploy,
                                delta=timedelta(seconds=1))
+
+    def test_no_flight_data(self):
+        with open('tests/fixtures/flysight_warmup.csv') as f:
+            request_data = f.read()
+
+        resp = self.app.post('/api/v1/scan', data=request_data)
+        data = json.loads(resp.data)
+        expected = {'error': 'no flight data'}
+
+        self.assertEqual(expected, data)

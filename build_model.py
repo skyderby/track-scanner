@@ -102,7 +102,12 @@ class ModelBuilder:
         print('--- Saving value distribution plot')
         plt.figure()
         plt.title('Examples by class')
-        plt.hist(self.df['is_flight'])
+        map_dict = {0: 'Canopy', 1: 'Flight'}
+        series = self.df['is_flight'].map(map_dict)
+
+        values = series.value_counts()
+        values.plot(kind='bar', colormap='Set2')
+        plt.xticks(rotation=0)
         plt.savefig('tracksegmenter/static/values_plot.png')
 
 

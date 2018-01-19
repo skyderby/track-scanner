@@ -26,12 +26,25 @@ def prediction():
 
     df['class'] = classifier.predict(df[features_list])
 
-    flight_end = df['class'].eq(1).cumsum().idxmax()
+    def group_details(x):
+        return pandas.Series({
+            'class': x.iloc[0]['class'],
+            'size': len(x.index),
+            'segment_end': x.index[-1]
+        })
+
+    df['group'] = df['class'].diff().ne(0).cumsum()
+    segments = df.groupby('group').apply(group_details)
+    idx = segments[segments['class'] == 1.0]['size'].idxmax()
+    flight_end = segments.loc[idx].segment_end
+
+    def format_datetime(date):
+        return date.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
 
     res = {
-        'activity': 'skydive',
-        'flight_starts_at': flight_start.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3],
-        'deploy_at': flight_end.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
+        'activity':         'skydive',
+        'flight_starts_at': format_datetime(flight_start),
+        'deploy_at':        format_datetime(flight_end)
     }
 
     return jsonify(res)

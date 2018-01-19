@@ -14,15 +14,15 @@ def extract_features(df):
     df.set_index('time', inplace=True)
 
     if 'h_speed' not in df.columns:
-        df['h_speed'] = (df['velN']**2 + df['velE']**2) ** 0.5
+        df['h_speed'] = (df['velN']**2 + df['velE']**2) ** 0.5 * 3.6
 
     if 'v_speed' not in df.columns:
-        df['v_speed'] = df['velD']
+        df['v_speed'] = df['velD'] * 3.6
 
     df['h_speed'] = savgol_filter(df['h_speed'], window, 0, mode='nearest')
     df['v_speed'] = savgol_filter(df['v_speed'], window, 0, mode='nearest')
 
-    V_SPEED_THRESHOLD = 7  # m/s
+    V_SPEED_THRESHOLD = 25  # km/h
     df['flight_started'] = (
         df['v_speed']
         .rolling(window='3s')

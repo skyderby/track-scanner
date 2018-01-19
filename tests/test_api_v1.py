@@ -1,7 +1,8 @@
 from tracksegmenter import app
 import unittest
 from flask import json
-from datetime import datetime, timedelta
+from datetime import timedelta
+from dateutil import parser as date_parser
 
 
 class TestAPI_V1(unittest.TestCase):
@@ -21,16 +22,33 @@ class TestAPI_V1(unittest.TestCase):
 
         data = json.loads(resp.data)
 
-        date_format = '%Y-%m-%dT%H:%M:%S.%f'
-        expected_start = datetime.strptime('2016-10-23T21:07:59.000',
-                                           date_format)
-        actual_start = datetime.strptime(data['flight_starts_at'],
-                                         date_format)
+        expected_start = date_parser.parse('2016-10-23T21:07:59.000Z')
+        actual_start = date_parser.parse(data['flight_starts_at'])
 
-        expected_deploy = datetime.strptime('2016-10-23T21:09:56.000',
-                                            date_format)
-        actual_deploy = datetime.strptime(data['deploy_at'],
-                                          date_format)
+        expected_deploy = date_parser.parse('2016-10-23T21:09:56.000Z')
+        actual_deploy = date_parser.parse(data['deploy_at'])
+
+        self.assertEqual('skydive', data['activity'])
+        self.assertAlmostEqual(expected_start,
+                               actual_start,
+                               delta=timedelta(seconds=1))
+        self.assertAlmostEqual(expected_deploy,
+                               actual_deploy,
+                               delta=timedelta(seconds=1))
+
+    def test_prediction_with_swoop(self):
+        resp = self.app.post(
+            '/api/v1/scan',
+            data=self.request_data('#703 14-41-39.CSV')
+        )
+
+        data = json.loads(resp.data)
+
+        expected_start = date_parser.parse('2014-08-07 14:50:14.400Z')
+        actual_start = date_parser.parse(data['flight_starts_at'])
+
+        expected_deploy = date_parser.parse('2014-08-07 14:52:02.800Z')
+        actual_deploy = date_parser.parse(data['deploy_at'])
 
         self.assertEqual('skydive', data['activity'])
         self.assertAlmostEqual(expected_start,

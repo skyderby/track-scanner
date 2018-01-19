@@ -25,7 +25,7 @@ class TestAPI_V1(unittest.TestCase):
         expected_start = date_parser.parse('2016-10-23T21:07:59.000Z')
         actual_start = date_parser.parse(data['flight_starts_at'])
 
-        expected_deploy = date_parser.parse('2016-10-23T21:09:56.000Z')
+        expected_deploy = date_parser.parse('2016-10-23T21:09:55.000Z')
         actual_deploy = date_parser.parse(data['deploy_at'])
 
         self.assertEqual('skydive', data['activity'])
@@ -34,7 +34,7 @@ class TestAPI_V1(unittest.TestCase):
                                delta=timedelta(seconds=1))
         self.assertAlmostEqual(expected_deploy,
                                actual_deploy,
-                               delta=timedelta(seconds=1))
+                               delta=timedelta(seconds=2))
 
     def test_prediction_with_swoop(self):
         resp = self.app.post(

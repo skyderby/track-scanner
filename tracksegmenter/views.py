@@ -16,7 +16,7 @@ def prediction():
     rows_with_flight = df[df['flight_started'] == True]
     flight_started_occurences = rows_with_flight.count()['flight_started']
     if flight_started_occurences < 5:
-        return jsonify({'error': 'no flight data'})
+        return jsonify({'error': 'no flight data'}), 422
 
     flight_start = (df['flight_started'].ne(False).idxmax() -
                     timedelta(seconds=2.55))

@@ -22,12 +22,18 @@ def extract_features(df):
     df['h_speed'] = savgol_filter(df['h_speed'], window, 0, mode='nearest')
     df['v_speed'] = savgol_filter(df['v_speed'], window, 0, mode='nearest')
 
-    V_SPEED_THRESHOLD = 25  # km/h
+    df['v_speed_chg_ms'] = (df['v_speed'] - df['v_speed'].shift().bfill()) / 3.6
+    df['v_acceleration'] = (
+        df['v_speed_chg_ms'] *
+        (1000 / df['time_diff'].astype('timedelta64[ms]').astype('float'))
+    )
+
+    V_ACCEL_THRESHOLD = 2.5  # m/s^2
     df['flight_started'] = (
-        df['v_speed']
+        df['v_acceleration']
         .rolling(window='3s')
         .mean()
-        .apply(lambda x: x > V_SPEED_THRESHOLD)
+        .apply(lambda x: x > V_ACCEL_THRESHOLD)
     )
 
     return df

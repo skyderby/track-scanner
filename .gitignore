@@ -1,6 +1,5 @@
 *.pyc
 *.orig
-model.pkl
 venv/
 .ropeproject/
 .cache

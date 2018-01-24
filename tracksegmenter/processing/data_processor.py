@@ -71,7 +71,8 @@ class DataProcessor:
         self.trimmed_df = df
 
     def ensure_flight_recorded(self):
-        pass
+        if self.flight_starts_at is None:
+            raise NoFlightFoundError
 
     def find_flight_start(self):
         df = self.trimmed_df.copy()
@@ -84,10 +85,13 @@ class DataProcessor:
             .apply(lambda x: x > V_SPEED_THRESHOLD)
         )
 
-        self.flight_starts_at = (
-            df['flight_started'].ne(False).idxmax() -
-            timedelta(seconds=3.0)
-        )
+        if df[df['flight_started'] == True].count()['flight_started'] > 1:
+            self.flight_starts_at = (
+                df['flight_started'].ne(False).idxmax() -
+                timedelta(seconds=3.0)
+            )
+        else:
+            self.flight_starts_at = None
 
     def find_deploy(self):
         def group_details(x):

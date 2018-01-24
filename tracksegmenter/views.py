@@ -14,30 +14,6 @@ def prediction():
 
     return jsonify(processing_result)
 
-    # flight_start = (df['flight_started'].ne(False).idxmax() -
-    #                 timedelta(seconds=2.55))
-    # df = df[flight_start:]
-    #
-    # df[features_list] = preprocessing.minmax_scale(df[features_list])
-    #
-    # df['class'] = classifier.predict(df[features_list])
-    #
-    # def group_details(x):
-    #     return pandas.Series({
-    #         'class': x.iloc[0]['class'],
-    #         'size': len(x.index),
-    #         'segment_end': x.index[-1]
-    #     })
-    #
-    # df['group'] = df['class'].diff().ne(0).cumsum()
-    # segments = df.groupby('group').apply(group_details)
-    # idx = segments[segments['class'] == 1.0]['size'].idxmax()
-    # flight_end = segments.loc[idx].segment_end
-    #
-    # def format_datetime(date):
-    #     return date.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
-    #
-
 
 @app.route('/', methods=['GET'])
 def index():

@@ -63,13 +63,13 @@ class TestAPI_V1(unittest.TestCase):
             deploy='2018-01-10 09:09:55.400Z'
         )
 
-    # def test_no_flight_data(self):
-    #     with open('tests/fixtures/flysight_warmup.csv') as f:
-    #         request_data = f.read()
-    #
-    #     resp = self.app.post('/api/v1/scan', data=request_data)
-    #     data = json.loads(resp.data)
-    #     expected = {'error': 'no flight data'}
-    #
-    #     self.assertEqual(422, resp.status_code)
-    #     self.assertEqual(expected, data)
+    def test_no_flight_data(self):
+        with open('tests/fixtures/flysight_warmup.csv') as f:
+            request_data = f.read()
+
+        resp = self.app.post('/api/v1/scan', data=request_data)
+        data = json.loads(resp.data)
+        expected = {'error': 'no flight data'}
+
+        self.assertEqual(422, resp.status_code)
+        self.assertEqual(expected, data)

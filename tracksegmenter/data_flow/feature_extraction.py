@@ -11,6 +11,9 @@ def extract_features(df):
     freq = 1000 / most_used_freq.astype('timedelta64[ms]').astype('float')
     window = freq * 3
 
+    if window % 2 == 0:
+        window += 1
+
     df.set_index('time', inplace=True)
 
     if 'h_speed' not in df.columns:

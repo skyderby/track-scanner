@@ -4,6 +4,7 @@ import pandas
 import numpy as np
 from sklearn import svm
 from sklearn import preprocessing
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.externals import joblib
 from scipy.signal import savgol_filter
 
@@ -12,35 +13,31 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt  # noqa
 
 
-def train_dataset(path_prefix=None):
-    from glob import glob
-
-    if path_prefix is None:
-        path_prefix = '.'
-
-    directory = glob(path_prefix + '/data/train/*.csv')
-    train_files = list()
-
+class ModelBuilderMixin:
     # All train files are 5Hz, window size is 3 sec
-    freq = 5
-    window = freq * 3
+    FREQ = 5
+    WINDOW = FREQ * 3
 
-    for name in directory:
-        df = pandas.read_csv(name)
+    def preprocess_file(self, df):
         df['h_speed'] = (df['velN']**2 + df['velE']**2) ** 0.5
         df['v_speed'] = df['velD']
-        df['h_speed'] = savgol_filter(df['h_speed'], window, 0, mode='nearest')
-        df['v_speed'] = savgol_filter(df['v_speed'], window, 0, mode='nearest')
+        df['h_speed'] = savgol_filter(df['h_speed'],
+                                      self.WINDOW,
+                                      0,
+                                      mode='nearest')
 
-        train_files.append(df)
+        df['v_speed'] = savgol_filter(df['v_speed'],
+                                      self.WINDOW,
+                                      0,
+                                      mode='nearest')
 
-    return pandas.concat(train_files)
+        return df
 
 
-class ModelBuilder:
+class FlightModelBuilder(ModelBuilderMixin):
     def __init__(self):
         self.features_list = ['h_speed', 'v_speed']
-        self.df = train_dataset()
+        self.df = self.train_dataset()
 
     def call(self):
         self.train_model()
@@ -69,7 +66,7 @@ class ModelBuilder:
     def save_model(self):
         print('--- Saving model to file')
 
-        joblib.dump(self.clf, 'model.pkl')
+        joblib.dump(self.clf, 'flight_model.pkl')
 
     def save_model_plot(self):
         print('--- Saving SVM plot')
@@ -110,6 +107,68 @@ class ModelBuilder:
         plt.xticks(rotation=0)
         plt.savefig('tracksegmenter/static/values_plot.png')
 
+    def train_dataset(self):
+        from glob import glob
+
+        directory = glob('./data/train/flight/*.csv')
+        train_files = list()
+
+        for name in directory:
+            df = pandas.read_csv(name)
+            df = self.preprocess_file(df)
+            train_files.append(df)
+
+        return pandas.concat(train_files)
+
+
+class AircraftModelBuilder(ModelBuilderMixin):
+    def __init__(self):
+        self.df = self.train_dataset()
+
+    def call(self):
+        self.train_model()
+        self.save_model()
+
+    def train_model(self):
+        print('--- Training model')
+
+        X = self.df[['h_speed', 'v_speed', 'gr']]
+        y = self.df['is_aircraft']
+
+        self.clf = DecisionTreeClassifier(criterion='entropy', max_depth=5)
+        self.clf.fit(X, y)
+
+    def save_model(self):
+        print('--- Saving model to file')
+
+        joblib.dump(self.clf, 'aircraft_model.pkl')
+
+    def train_dataset(self):
+        from glob import glob
+
+        directory = glob('./data/train/aircraft/*.csv')
+        train_files = list()
+
+        for name in directory:
+            df = pandas.read_csv(name)
+            df = self.preprocess_file(df)
+            train_files.append(df)
+
+        return pandas.concat(train_files)
+
+    def preprocess_file(self, df):
+        df = super().preprocess_file(df)
+
+        df['is_aircraft'] = (df['class'] == 4).astype('float')
+        df['gr'] = df['h_speed'] / df['v_speed']
+        df['gr'] = df['gr'].replace([np.inf, -np.inf], np.nan).bfill()
+
+        return df
+
 
 if __name__ == '__main__':
-    ModelBuilder().call()
+    print('### Flight model')
+    FlightModelBuilder().call()
+
+    print('\n### Aircraft model')
+    AircraftModelBuilder().call()

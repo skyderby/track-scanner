@@ -19,8 +19,8 @@ class ModelBuilderMixin:
     WINDOW = FREQ * 3
 
     def preprocess_file(self, df):
-        df['h_speed'] = (df['velN']**2 + df['velE']**2) ** 0.5
-        df['v_speed'] = df['velD']
+        df['h_speed'] = (df['velN']**2 + df['velE']**2) ** 0.5 * 3.6
+        df['v_speed'] = df['velD'] * 3.6
         df['h_speed'] = savgol_filter(df['h_speed'],
                                       self.WINDOW,
                                       0,

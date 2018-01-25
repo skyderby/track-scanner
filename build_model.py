@@ -54,13 +54,13 @@ class FlightModelBuilder(ModelBuilderMixin):
         self.df['is_flight'] = (self.df['class'] == 2).astype('float')
 
         self.df[self.features_list] = (
-            preprocessing.minmax_scale(self.df[self.features_list])
+            preprocessing.scale(self.df[self.features_list])
         )
 
         X = self.df[self.features_list]
         y = self.df['is_flight']
 
-        self.clf = svm.SVC(kernel='rbf', gamma=1.0, C=100)
+        self.clf = svm.SVC(kernel='rbf', gamma=10, C=1000)
         self.clf.fit(X, y)
 
     def save_model(self):

@@ -1,7 +1,7 @@
 import pandas
 import numpy as np
 from io import StringIO
-from sklearn.preprocessing import minmax_scale
+from sklearn import preprocessing
 from sklearn.externals import joblib
 from scipy.signal import savgol_filter
 from datetime import timedelta
@@ -88,7 +88,7 @@ class DataProcessor:
         if df[df['flight_started'] == True].count()['flight_started'] > 1:
             self.flight_starts_at = (
                 df['flight_started'].ne(False).idxmax() -
-                timedelta(seconds=3.0)
+                timedelta(seconds=2.5)
             )
         else:
             self.flight_starts_at = None
@@ -106,7 +106,7 @@ class DataProcessor:
         df = df[self.flight_starts_at:]
         features_list = ['h_speed', 'v_speed']
 
-        df[features_list] = minmax_scale(df[features_list])
+        df[features_list] = preprocessing.scale(df[features_list])
         df['class'] = flight_classifier.predict(df[features_list])
 
         df['group'] = df['class'].diff().ne(0).cumsum()

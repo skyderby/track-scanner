@@ -30,30 +30,30 @@ class TestAPI_V1(unittest.TestCase):
 
         self.assertAlmostEqual(expected_start,
                                actual_start,
-                               delta=timedelta(seconds=1))
+                               delta=timedelta(seconds=3))
         self.assertAlmostEqual(expected_deploy,
                                actual_deploy,
-                               delta=timedelta(seconds=2))
+                               delta=timedelta(seconds=3))
 
     def test_prediction_wind_affected(self):
         self.track_test(
             filename='#7990 15-56-18.CSV',
             start='2016-10-23T21:08:08.000Z',
-            deploy='2016-10-23T21:09:55.000Z'
+            deploy='2016-10-23T21:09:56.000Z'
         )
 
     def test_prediction_with_swoop(self):
         self.track_test(
             filename='#703 14-41-39.CSV',
             start='2014-08-07 14:50:14.400Z',
-            deploy='2014-08-07 14:52:02.800Z'
+            deploy='2014-08-07 14:52:00.000Z'
         )
 
     def test_prediction_with_high_aircraft_descend(self):
         self.track_test(
             filename='#RWL 13-41-49.CSV',
             start='2017-06-17 10:02:31.000Z',
-            deploy='2017-06-17 10:04:57.000Z'
+            deploy='2017-06-17 10:04:39.000Z'
         )
 
     def test_prediction_basejump(self):

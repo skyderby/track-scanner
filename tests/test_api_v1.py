@@ -46,21 +46,21 @@ class TestAPI_V1(unittest.TestCase):
         self.track_test(
             filename='#703 14-41-39.CSV',
             start='2014-08-07 14:50:14.400Z',
-            deploy='2014-08-07 14:52:00.000Z'
+            deploy='2014-08-07 14:52:03.000Z'
         )
 
     def test_prediction_with_high_aircraft_descend(self):
         self.track_test(
             filename='#RWL 13-41-49.CSV',
             start='2017-06-17 10:02:31.000Z',
-            deploy='2017-06-17 10:04:39.000Z'
+            deploy='2017-06-17 10:04:43.000Z'
         )
 
     def test_prediction_basejump(self):
         self.track_test(
             filename='Base Big WS labeled.csv',
             start='2018-01-10 09:09:12.000Z',
-            deploy='2018-01-10 09:09:55.400Z'
+            deploy='2018-01-10 09:09:57.400Z'
         )
 
     def test_no_flight_data(self):

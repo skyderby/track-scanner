@@ -65,7 +65,7 @@ class FlightModelBuilder(ModelBuilderMixin):
         X = self.df[self.features_list]
         y = self.df['is_flight']
 
-        self.clf = svm.SVC(kernel='rbf', gamma=10, C=1000)
+        self.clf = svm.SVC(kernel='rbf', gamma=1.0, C=0.1)
         self.clf.fit(X, y)
 
     def save_model(self):
@@ -171,9 +171,56 @@ class AircraftModelBuilder(ModelBuilderMixin):
         return df
 
 
+class GroundModelBuilder(ModelBuilderMixin):
+    def __init__(self):
+        self.df = self.train_dataset()
+
+    def call(self):
+        self.train_model()
+        self.save_model()
+
+    def train_model(self):
+        print('--- Training model')
+
+        X = self.df[['h_speed', 'v_speed', 'altitude_chng']]
+        y = self.df['is_ground']
+
+        self.clf = DecisionTreeClassifier(criterion='entropy', max_depth=5)
+        self.clf.fit(X, y)
+
+    def save_model(self):
+        print('--- Saving model to file')
+
+        joblib.dump(self.clf, 'ground_model.pkl')
+
+    def train_dataset(self):
+        from glob import glob
+
+        directory = glob('./data/train/ground/*.csv')
+        train_files = list()
+
+        for name in directory:
+            df = pandas.read_csv(name)
+            df = self.preprocess_file(df)
+            train_files.append(df)
+
+        return pandas.concat(train_files)
+
+    def preprocess_file(self, df):
+        df = super().preprocess_file(df)
+
+        df['is_ground'] = (df['class'] == 1).astype('float')
+        df['altitude_chng'] = (df['hMSL'].rolling(window=25).std()).bfill()
+
+        return df
+
+
 if __name__ == '__main__':
     print('### Flight model')
     FlightModelBuilder().call()
 
     print('\n### Aircraft model')
     AircraftModelBuilder().call()
+
+    print('\n### Ground model')
+    GroundModelBuilder().call()

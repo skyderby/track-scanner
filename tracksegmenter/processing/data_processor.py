@@ -9,6 +9,7 @@ from datetime import timedelta
 
 flight_classifier = joblib.load('flight_model.pkl')
 aircraft_classifier = joblib.load('aircraft_model.pkl')
+ground_classifier = joblib.load('ground_model.pkl')
 
 
 class NoFlightFoundError(Exception):
@@ -23,9 +24,10 @@ class DataProcessor:
     def call(self):
         self.read_data()
         self.preprocess_data()
-        self.trim_data()
+        self.trim_to_aircraft_exit()
         self.find_flight_start()
         self.ensure_flight_recorded()
+        self.trim_from_landing()
         self.find_deploy()
 
         return self.processing_result()
@@ -55,24 +57,18 @@ class DataProcessor:
         df['gr'] = df['h_speed'] / df['v_speed']
         df['gr'] = df['gr'].replace([np.inf, -np.inf], np.nan).bfill()
 
+        df['altitude_std'] = (df['hMSL'].rolling(window='5s').std()).bfill()
+
         self.preprocessed_df = df
 
-    def trim_data(self):
+    def trim_to_aircraft_exit(self):
         df = self.preprocessed_df.copy()
 
         aircraft_exit = self.find_aircraft_exit(df)
         if aircraft_exit is not None:
             df = df[aircraft_exit - timedelta(seconds=3):]
 
-        landing = self.find_landing(df)
-        if landing is not None:
-            df = df[:landing + timedelta(seconds=3)]
-
         self.trimmed_df = df
-
-    def ensure_flight_recorded(self):
-        if self.flight_starts_at is None:
-            raise NoFlightFoundError
 
     def find_flight_start(self):
         df = self.trimmed_df.copy()
@@ -93,10 +89,23 @@ class DataProcessor:
         else:
             self.flight_starts_at = None
 
+    def ensure_flight_recorded(self):
+        if self.flight_starts_at is None:
+            raise NoFlightFoundError
+
+    def trim_from_landing(self):
+        df = self.trimmed_df[self.flight_starts_at:].copy()
+
+        landing = self.find_landing(df)
+        if landing is not None:
+            df = df[:landing + timedelta(seconds=3)]
+
+        self.trimmed_df = df
+
     def find_deploy(self):
         def group_details(x):
             return pandas.Series({
-                'class': x.iloc[0]['class'],
+                'class': x.iloc[0]['is_flight'],
                 'size': len(x.index),
                 'segment_end': x.index[-1]
             })
@@ -107,9 +116,10 @@ class DataProcessor:
         features_list = ['h_speed', 'v_speed']
 
         df[features_list] = preprocessing.scale(df[features_list])
-        df['class'] = flight_classifier.predict(df[features_list])
+        df['is_flight'] = flight_classifier.predict(df[features_list])
+        df['is_flight'] = df['is_flight'].rolling(window='5s').median()
 
-        df['group'] = df['class'].diff().ne(0).cumsum()
+        df['group'] = df['is_flight'].diff().ne(0).cumsum()
         segments = df.groupby('group').apply(group_details)
         idx = segments[segments['class'] == 1.0]['size'].idxmax()
 
@@ -133,6 +143,7 @@ class DataProcessor:
         def group_details(x):
             return pandas.Series({
                 'class': x.iloc[0].is_aircraft,
+                'altitude_gain': x['hMSL'].max() - x['hMSL'].min(),
                 'segment_start': x.index[0],
                 'segment_end': x.index[-1],
                 'duration_s': x.index[-1] - x.index[0]
@@ -143,6 +154,7 @@ class DataProcessor:
                       .apply(group_details)
                       .sort_values('duration_s'))
         segments = segments[segments['class'] == 1.0]
+        segments = segments[segments['altitude_gain'] > 250]
         segments = segments[segments['duration_s'] > timedelta(minutes=1)]
 
         if segments.empty:
@@ -151,7 +163,28 @@ class DataProcessor:
             return segments.iloc[0]['segment_end']
 
     def find_landing(self, df):
-        pass
+        df['is_ground'] = ground_classifier.predict(
+            df[['h_speed', 'v_speed', 'altitude_std']]
+        )
+        df['is_ground'] = df['is_ground'].rolling(window='5s').median()
+
+        def group_details(x):
+            return pandas.Series({
+                'class': x.iloc[0].is_ground,
+                'segment_start': x.index[0],
+                'segment_end': x.index[-1],
+                'duration_s': x.index[-1] - x.index[0]
+            })
+
+        df['group'] = df['is_ground'].diff().ne(0).cumsum()
+        segments = df.groupby('group').apply(group_details)
+        segments = segments[segments['class'] == 1.0]
+        segments = segments[segments['duration_s'] > timedelta(seconds=30)]
+
+        if segments.empty:
+            return None
+        else:
+            return segments.iloc[0]['segment_start']
 
     def window_size(self, df):
         window_duration = 3  # seconds

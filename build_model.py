@@ -12,6 +12,11 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt  # noqa
 
+import warnings  # noqa
+warnings.filterwarnings(action="ignore",
+                        module="scipy",
+                        message="^internal gelsd")
+
 
 class ModelBuilderMixin:
     # All train files are 5Hz, window size is 3 sec

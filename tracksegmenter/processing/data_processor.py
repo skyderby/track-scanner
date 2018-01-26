@@ -152,7 +152,7 @@ class DataProcessor:
         df['group'] = df['is_aircraft'].diff().ne(0).cumsum()
         segments = (df.groupby('group')
                       .apply(group_details)
-                      .sort_values('duration_s'))
+                      .sort_values('segment_end', ascending=False))
         segments = segments[segments['class'] == 1.0]
         segments = segments[segments['altitude_gain'] > 250]
         segments = segments[segments['duration_s'] > timedelta(minutes=1)]

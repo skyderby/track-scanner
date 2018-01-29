@@ -58,8 +58,9 @@ class FlightModelBuilder(ModelBuilderMixin):
 
         self.df['is_flight'] = (self.df['class'] == 2).astype('float')
 
+        self.scaler = preprocessing.StandardScaler()
         self.df[self.features_list] = (
-            preprocessing.scale(self.df[self.features_list])
+            self.scaler.fit_transform(self.df[self.features_list])
         )
 
         X = self.df[self.features_list]
@@ -71,7 +72,8 @@ class FlightModelBuilder(ModelBuilderMixin):
     def save_model(self):
         print('--- Saving model to file')
 
-        joblib.dump(self.clf, 'flight_model.pkl')
+        joblib.dump(self.clf, 'model/flight.pkl')
+        joblib.dump(self.scaler, 'model/flight_scaler.pkl')
 
     def save_model_plot(self):
         print('--- Saving SVM plot')
@@ -146,7 +148,7 @@ class AircraftModelBuilder(ModelBuilderMixin):
     def save_model(self):
         print('--- Saving model to file')
 
-        joblib.dump(self.clf, 'aircraft_model.pkl')
+        joblib.dump(self.clf, 'model/aircraft.pkl')
 
     def train_dataset(self):
         from glob import glob
@@ -191,7 +193,7 @@ class GroundModelBuilder(ModelBuilderMixin):
     def save_model(self):
         print('--- Saving model to file')
 
-        joblib.dump(self.clf, 'ground_model.pkl')
+        joblib.dump(self.clf, 'model/ground.pkl')
 
     def train_dataset(self):
         from glob import glob

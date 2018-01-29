@@ -39,20 +39,20 @@ class TestAPI_V1(unittest.TestCase):
         self.track_test(
             filename='#7990 15-56-18.CSV',
             start='2016-10-23T21:08:08.000Z',
-            deploy='2016-10-23T21:09:56.000Z'
+            deploy='2016-10-23T21:10:03.000Z'
         )
 
     def test_prediction_with_swoop(self):
         self.track_test(
             filename='#703 14-41-39.CSV',
-            start='2014-08-07 14:50:14.400Z',
+            start='2014-08-07 14:50:20.000Z',
             deploy='2014-08-07 14:52:03.000Z'
         )
 
     def test_prediction_with_high_aircraft_descend(self):
         self.track_test(
             filename='#RWL 13-41-49.CSV',
-            start='2017-06-17 10:02:31.000Z',
+            start='2017-06-17 10:02:37.000Z',
             deploy='2017-06-17 10:04:43.000Z'
         )
 

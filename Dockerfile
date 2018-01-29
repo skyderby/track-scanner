@@ -9,7 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /opt/app
 
-RUN python build_model.py
+RUN python build_models.py
 
 EXPOSE 80
 

@@ -31,9 +31,9 @@ class Preprocessor:
         df['v_speed'] = savgol_filter(df['v_speed'], window, 0, mode='nearest')
 
         df['gr'] = df['h_speed'] / df['v_speed']
-        df['gr'] = df['gr'].replace([np.inf, -np.inf], np.nan).bfill()
+        df['gr'] = df['gr'].replace([np.inf, -np.inf], np.nan).bfill().ffill()
 
-        df['altitude_std'] = (df['hMSL'].rolling(window='5s').std()).bfill()
+        df['altitude_std'] = (df['hMSL'].rolling(window='5s').std()).bfill().ffill()
 
         df['is_aircraft'] = aircraft_classifier.predict(
             df[['h_speed', 'v_speed', 'gr']]

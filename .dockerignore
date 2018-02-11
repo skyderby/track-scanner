@@ -1,6 +1,7 @@
 *.pyc
 *.orig
-model.pkl
+aircraft_model.pkl
+flight_model.pkl
 venv/
 .ropeproject
 .cache

@@ -37,28 +37,28 @@ class TestAPI_V1(unittest.TestCase):
 
     def test_prediction_wind_affected(self):
         self.track_test(
-            filename='#7990 15-56-18.CSV',
+            filename='7990_15-56-18.csv',
             start='2016-10-23T21:08:08.000Z',
             deploy='2016-10-23T21:10:03.000Z'
         )
 
     def test_prediction_with_swoop(self):
         self.track_test(
-            filename='#703 14-41-39.CSV',
+            filename='703_14-41-39.csv',
             start='2014-08-07 14:50:20.000Z',
             deploy='2014-08-07 14:52:03.000Z'
         )
 
     def test_prediction_with_high_aircraft_descend(self):
         self.track_test(
-            filename='#RWL 13-41-49.CSV',
+            filename='RWL_13-41-49.csv',
             start='2017-06-17 10:02:37.000Z',
             deploy='2017-06-17 10:04:43.000Z'
         )
 
     def test_prediction_basejump(self):
         self.track_test(
-            filename='Base Big WS labeled.csv',
+            filename='Base_Big_WS_labeled.csv',
             start='2018-01-10 09:09:12.000Z',
             deploy='2018-01-10 09:09:57.400Z'
         )

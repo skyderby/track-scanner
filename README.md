@@ -20,7 +20,6 @@ curl -H "Content-Type: application/csv" -X POST https://track-scanner.herokuapp.
 Response:
 ```
 {
-  "activity": "skydive",
   "flight_starts_at": "2016-10-23T21:07:59.650"
   "deploy_at": "2016-10-23T21:09:55.400",
 }

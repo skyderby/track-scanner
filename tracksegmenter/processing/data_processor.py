@@ -35,7 +35,7 @@ class DataProcessor:
         self.preprocessed_df = Preprocessor(self.raw_df).call()
 
     def find_flight_start(self):
-        df = self.preprocessed_df.copy()
+        df = self.preprocessed_df
 
         V_SPEED_THRESHOLD = 35  # km/h
         passed_treshold = (

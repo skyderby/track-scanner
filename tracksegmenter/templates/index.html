@@ -1,4 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
-Hello World!
+<div class="container-fluid">
+  <div class="row">
+    {% for figure in figures %}
+    <div class="col-sm-4 text-center">
+      <img class="img-fluid" src="/track_plot/{{ figure }}">
+      <h4>{{ figure }}</h4>
+    </div>
+    {% endfor %}
+  </div>
+</div>
 {% endblock %}

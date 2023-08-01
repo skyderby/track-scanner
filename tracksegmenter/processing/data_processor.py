@@ -14,7 +14,6 @@ class NoFlightFoundError(Exception):
     """ Exception raised if no flight found in processed data """
     pass
 
-
 class DataProcessor:
     def __init__(self, string_data):
         self.string_data = string_data

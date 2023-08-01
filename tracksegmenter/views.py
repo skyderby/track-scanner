@@ -1,6 +1,6 @@
 from tracksegmenter import app
 from flask import request, jsonify, render_template
-from tracksegmenter.processing import DataProcessor, NoFlightFoundError
+from tracksegmenter.processing import DataProcessor, NoFlightFoundError, InvalidFlightDataError
 
 
 @app.route('/api/v1/scan', methods=['POST'])
@@ -11,6 +11,8 @@ def prediction():
         processing_result = DataProcessor(posted_data).call()
     except NoFlightFoundError:
         return jsonify({'error': 'no flight data'}), 422
+    except InvalidFlightDataError:
+        return jsonify({'error': 'invalid flight data'}), 422
 
     return jsonify(processing_result)
 

@@ -1,11 +1,15 @@
 import pandas
 import numpy as np
+import logging
 from scipy.signal import savgol_filter
 from sklearn.externals import joblib
 
 aircraft_classifier = joblib.load('model/aircraft.pkl')
 ground_classifier = joblib.load('model/ground.pkl')
 
+class InvalidFlightDataError(Exception):
+    """ Exception raised if the flight data is invalid. This was implemented to handle CSV files with incorrectly ordered timestamps. """
+    pass
 
 class Preprocessor:
     def __init__(self, df):
@@ -33,11 +37,16 @@ class Preprocessor:
         df['gr'] = df['h_speed'] / df['v_speed']
         df['gr'] = df['gr'].replace([np.inf, -np.inf], np.nan).bfill().ffill()
 
-        df['altitude_std'] = (df['hMSL'].rolling(window='5s').std()).bfill().ffill()
+        try:
+            df['altitude_std'] = (df['hMSL'].rolling(window='5s').std()).bfill().ffill()
+        except Exception as e:
+            # TODO Check for "ValueError: index must be monotonic" and return a more specific error message about timestamps being incorrectly ordered.
+            raise InvalidFlightDataError
 
         df['is_aircraft'] = aircraft_classifier.predict(
             df[['h_speed', 'v_speed', 'gr']]
         )
+
         df['is_aircraft'] = df['is_aircraft'].rolling(window='15s').median()
 
         df['is_ground'] = ground_classifier.predict(
